@@ -414,15 +414,7 @@ These tags take a `d` attribute which stands for a set of drawing commands.  The
 
 #### Arcs
 
-An arc is a command that you can add to a path that will draw part of an ellipse.  To do this, we first begin with only two points:
-
-![two point](http://blog.arcbees.com/wp-content/uploads/svg-arc2.png)
-
-For any two points, there are only two ellipses with the same width/height and rotation that contain both points.  In the image above, try to imagine moving the ellipses around without rotating or scaling them.  As soon as you do, they loose contact with at least one of the two given points.  One point might be on the ellipse, but the other won't be.
-
-We can use this information to draw any of the four colored arcs shown in the image above.
-
-Make the following code part of the `d` attribute's value on a `<path>` element.
+An arc is a command that you can add to a path that will draw part of an ellipse.  To do this, we first begin with only two points.  Make the following code part of the `d` attribute's value on a `<path>` element.
 
 ```
 A rx ry x-axis-rotation large-arc-flag sweep-flag x y
