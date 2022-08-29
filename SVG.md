@@ -311,7 +311,7 @@ The start/end point are where the curve starts and ends.  The control points def
 
 As we manipulate the control points, we can see how the shape of the curve is affected:
 
-![](https://i.imgur.com/M9S1sW7.png
+![](https://i.imgur.com/M9S1sW7.png)
 
 Here's another example:
 
