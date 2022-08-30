@@ -48,7 +48,7 @@ Now add a link to D3 at the bottom of your `<body>` tag in `index.html`.  We'll 
 
 ```html
 <body>    
-    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </body>
 ```
 
@@ -63,7 +63,7 @@ and link to it in `index.html` at the bottom of the `<body>` tag.  Make sure it 
 
 ```html
 <body>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="app.js" charset="utf-8"></script>
 </body>
 ```
@@ -79,7 +79,7 @@ In `index.html`, at the top of the `<body>`, before your `script` tags, add an `
 ```html
 <body>
     <svg></svg>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="app.js" charset="utf-8"></script>
 </body>
 ```
@@ -91,8 +91,8 @@ If we examine the Elements tab of our dev tools, we'll see the `svg` element has
 In `app.js`, remove your previous `console.log` statements and create variables to hold the width and height of the `<svg>` tag:
 
 ```javascript
-var WIDTH = 800;
-var HEIGHT = 600;
+const WIDTH = 800;
+const HEIGHT = 600;
 ```
 
 Next, we can use `d3.select()` to select a single element, in this case the `<svg>` element:
@@ -121,10 +121,10 @@ Now when we check the dev tools, we'll see the `<svg>` element has been resized:
 In `app.js` let's create an array of "run" objects (**NOTE:** I'm storing the date as a string on purpose.  Also, it's important that this be an array of objects, in order to work with D3).  Here's what your `app.js` code should look like so far:
 
 ```javascript
-var WIDTH = 800;
-var HEIGHT = 600;
+const WIDTH = 800;
+const HEIGHT = 600;
 
-var runs = [
+const runs = [
     {
         id: 1,
         date: 'October 1, 2017 at 4:00PM',
@@ -196,7 +196,7 @@ First, let's position the circles vertically, based on the `distance` property o
 At the bottom of `app.js`, add the following:
 
 ```javascript
-var yScale = d3.scaleLinear(); //create the scale
+const yScale = d3.scaleLinear(); //create the scale
 ```
 
 Whenever we create a scale, we need to tell it what are the minimum and maximum possible values that can exist in our data (this is called the "domain").  To do so for our `yScale`, add the following to the bottom of `app.js`:
@@ -216,7 +216,7 @@ yScale.range([HEIGHT, 0]);
 Your last three lines of code in app.js should look like this now:
 
 ```javascript
-var yScale = d3.scaleLinear(); //create the scale
+const yScale = d3.scaleLinear(); //create the scale
 yScale.domain([0, 10]); //minimum data value is 0, max is 10
 //HEIGHT corresponds to min data value
 //0 corresponds to max data value
@@ -294,7 +294,7 @@ But now that each circle has one of our "runs" javascript data objects attached 
 
 ```javascript
 d3.selectAll('circle').data(runs)
-    .attr('cy', function(datum, index){
+    .attr('cy', (datum, index) => {
         return yScale(datum.distance);
     });
 ```
