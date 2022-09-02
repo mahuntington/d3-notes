@@ -377,10 +377,10 @@ and change it to this:
 ```javascript
 const yScale = d3.scaleLinear(); //create the scale
 yScale.range([HEIGHT, 0]); //set the visual range (e.g. 600 to 0)
-const yMin = d3.min(runs, function(datum, index){
+const yMin = d3.min(runs, (datum, index) => {
     return datum.distance; //compare distance properties of each item in the data array
 })
-const yMax = d3.max(runs, function(datum, index){
+const yMax = d3.max(runs, (datum, index) => {
     return datum.distance; //compare distance properties of each item in the data array
 })
 yScale.domain([yMin, yMax]); //now that we have the min/max of the data set for distance, we can use those values for the yScale domain
@@ -394,7 +394,7 @@ Chrome should look like this:
 Let's examine what we just wrote.  The following code finds the minimum distance:
 
 ```javascript
-const yMin = d3.min(runs, function(datum, index){
+const yMin = d3.min(runs, (datum, index) => {
     return datum.distance; //compare distance properties of each item in the data array
 })
 ```
