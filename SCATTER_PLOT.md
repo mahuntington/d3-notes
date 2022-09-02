@@ -502,7 +502,7 @@ This might seem unnecessary.  Why not just do `d3.selectAll('circle')`?  Well, a
 D3 can automatically generate axes for you.  Add the following to the bottom of `app.js`:
 
 ```javascript
-var bottomAxis = d3.axisBottom(xScale); //pass the appropriate scale in as a parameter
+const bottomAxis = d3.axisBottom(xScale); //pass the appropriate scale in as a parameter
 ```
 
 This creates a bottom axis generator that can be used to insert an axis into any element you choose.  Add the following code at the bottom of `app.js` to append a `<g>` element inside our SVG element and then insert a bottom axis inside of it:
@@ -520,11 +520,11 @@ Here's what Chrome should look like:
 We want the axis to be at the bottom of the SVG, though.  Modify the code we just wrote so it looks like this (**NOTE:** we removed a `;` after `.call(bottomAxis)` and added `.attr('transform', 'translate(0,'+HEIGHT+')');`):
 
 ```javascript
-var bottomAxis = d3.axisBottom(xScale); //pass the appropriate scale in as a parameter
+const bottomAxis = d3.axisBottom(xScale); //pass the appropriate scale in as a parameter
 d3.select('svg')
 	.append('g') //put everything inside a group
 	.call(bottomAxis) //generate the axis within the group
-    .attr('transform', 'translate(0,'+HEIGHT+')'); //move it to the bottom
+	.attr('transform', 'translate(0,'+HEIGHT+')'); //move it to the bottom
 ```
 
 Currently, our SVG clips the axis:
@@ -546,7 +546,7 @@ Now it looks good:
 The left axis is pretty similar.  Add the following to the bottom of `app.js`:
 
 ```javascript
-var leftAxis = d3.axisLeft(yScale);
+const leftAxis = d3.axisLeft(yScale);
 d3.select('svg')
 	.append('g')
 	.call(leftAxis); //no need to transform, since it's placed correctly initially
