@@ -317,7 +317,7 @@ In summary what this does is loop through each `circle` in the SVG.  For each `c
 Let's position the circles horizontally, based on the date that their associated run happened.  First, create a time scale.  This is like a linear scale, but instead of mapping numeric values to visual points, it maps Dates to visual points. Add the following to the bottom of `app.js`:
 
 ```javascript
-var xScale = d3.scaleTime(); //scaleTime maps date values with numeric visual points
+const xScale = d3.scaleTime(); //scaleTime maps date values with numeric visual points
 xScale.range([0,WIDTH]);
 xScale.domain([new Date('2017-10-1'), new Date('2017-10-31')]);
 
@@ -336,10 +336,10 @@ You can now remove the two `console.log()` statements.
 Note that the `date` properties of the objects in our `runs` array are strings and not Date objects.  This is a problem because `xScale`, as with all time scales, expects its data values to be Date objects.  Fortunately, D3 provides us an easy way to convert strings to dates and vice versa. We'll use a specially formatted string, based on the documentation (https://github.com/d3/d3-time-format#locale_format), to tell D3 how to parse the `date` String properties of the objects in our `runs` array into actual JavaScript Date objects.  Add the following at the end of `app.js`:
 
 ```javascript
-var parseTime = d3.timeParse("%B%e, %Y at %-I:%M%p"); //this format matches our data in the runs array
+const parseTime = d3.timeParse("%B%e, %Y at %-I:%M%p"); //this format matches our data in the runs array
 console.log(parseTime('October 3, 2017 at 6:00PM'));
 
-var formatTime = d3.timeFormat("%B%e, %Y at %-I:%M%p"); //this format matches our data in the runs array
+const formatTime = d3.timeFormat("%B%e, %Y at %-I:%M%p"); //this format matches our data in the runs array
 console.log(formatTime(new Date()));
 ```
 
@@ -349,7 +349,7 @@ Let's use this when calculating `cx` attributes for our circles.  Remove the las
 
 ```javascript
 d3.selectAll('circle')
-    .attr('cx', function(datum, index){
+    .attr('cx', (datum, index) => {
         return xScale(parseTime(datum.date)); //use parseTime to convert the date string property on the datum object to a Date object, which xScale then converts to a visual value
     });
 ```
@@ -367,7 +367,7 @@ At the moment, we're setting arbitrary min/max values for the domains of both di
 Go to this part of the code:
 
 ```javascript
-var yScale = d3.scaleLinear(); //create the scale
+const yScale = d3.scaleLinear(); //create the scale
 yScale.range([HEIGHT, 0]); //set the visual range (e.g. 600 to 0)
 yScale.domain([0, 10]); //set the data domain (e.g. 0 to 10)
 ```
@@ -375,12 +375,12 @@ yScale.domain([0, 10]); //set the data domain (e.g. 0 to 10)
 and change it to this:
 
 ```javascript
-var yScale = d3.scaleLinear(); //create the scale
+const yScale = d3.scaleLinear(); //create the scale
 yScale.range([HEIGHT, 0]); //set the visual range (e.g. 600 to 0)
-var yMin = d3.min(runs, function(datum, index){
+const yMin = d3.min(runs, function(datum, index){
     return datum.distance; //compare distance properties of each item in the data array
 })
-var yMax = d3.max(runs, function(datum, index){
+const yMax = d3.max(runs, function(datum, index){
     return datum.distance; //compare distance properties of each item in the data array
 })
 yScale.domain([yMin, yMax]); //now that we have the min/max of the data set for distance, we can use those values for the yScale domain
@@ -394,7 +394,7 @@ Chrome should look like this:
 Let's examine what we just wrote.  The following code finds the minimum distance:
 
 ```javascript
-var yMin = d3.min(runs, function(datum, index){
+const yMin = d3.min(runs, function(datum, index){
     return datum.distance; //compare distance properties of each item in the data array
 })
 ```
@@ -404,12 +404,12 @@ D3 loops through the `runs` array (the first parameter) and calls the callback f
 We can combine both the min/max functions into one `extent` function that returns an array that has the exact same structure as `[yMin, yMax]`.  Change the code we just wrote:
 
 ```javascript
-var yScale = d3.scaleLinear(); //create the scale
+const yScale = d3.scaleLinear(); //create the scale
 yScale.range([HEIGHT, 0]); //set the visual range (e.g. 600 to 0)
-var yMin = d3.min(runs, function(datum, index){
+const yMin = d3.min(runs, (datum, index) => {
     return datum.distance; //compare distance properties of each item in the data array
 })
-var yMax = d3.max(runs, function(datum, index){
+const yMax = d3.max(runs, (datum, index) => {
     return datum.distance; //compare distance properties of each item in the data array
 })
 yScale.domain([yMin, yMax]); //now that we have the min/max of the data set for distance, we can use those values for the yScale domain
@@ -418,9 +418,9 @@ yScale.domain([yMin, yMax]); //now that we have the min/max of the data set for 
 to this:
 
 ```javascript
-var yScale = d3.scaleLinear(); //create the scale
+const yScale = d3.scaleLinear(); //create the scale
 yScale.range([HEIGHT, 0]); //set the visual range (e.g. 600 to 0)
-var yDomain = d3.extent(runs, function(datum, index){
+const yDomain = d3.extent(runs, (datum, index) => {
     return datum.distance; //compare distance properties of each item in the data array
 })
 yScale.domain(yDomain);
@@ -429,22 +429,22 @@ yScale.domain(yDomain);
 Much shorter, right?  Let's do the same for the xScale's domain.  Go to this part of the code:
 
 ```javascript
-var xScale = d3.scaleTime(); //scaleTime maps date values with numeric visual points
+const xScale = d3.scaleTime(); //scaleTime maps date values with numeric visual points
 xScale.range([0,WIDTH]);
 xScale.domain([new Date('2017-10-1'), new Date('2017-10-31')]);
 
-var parseTime = d3.timeParse("%B%e, %Y at %-I:%M%p"); //this format matches our data in the runs array
-var formatTime = d3.timeFormat("%B%e, %Y at %-I:%M%p"); //this format matches our data in the runs array
+const parseTime = d3.timeParse("%B%e, %Y at %-I:%M%p"); //this format matches our data in the runs array
+const formatTime = d3.timeFormat("%B%e, %Y at %-I:%M%p"); //this format matches our data in the runs array
 ```
 
 and change it to:
 
 ```javascript
-var parseTime = d3.timeParse("%B%e, %Y at %-I:%M%p");
-var formatTime = d3.timeFormat("%B%e, %Y at %-I:%M%p");
-var xScale = d3.scaleTime();
+const parseTime = d3.timeParse("%B%e, %Y at %-I:%M%p");
+const formatTime = d3.timeFormat("%B%e, %Y at %-I:%M%p");
+const xScale = d3.scaleTime();
 xScale.range([0,WIDTH]);
-var xDomain = d3.extent(runs, function(datum, index){
+const xDomain = d3.extent(runs, (datum, index) => {
     return parseTime(datum.date);
 });
 xScale.domain(xDomain);
@@ -466,7 +466,7 @@ In `app.js`, go to this part of the code:
 
 ```javascript
 d3.selectAll('circle').data(runs)
-    .attr('cy', function(datum, index){
+    .attr('cy', (datum, index) => {
         return yScale(datum.distance);
     });
 ```
@@ -480,7 +480,7 @@ d3.select('svg').selectAll('circle') //since no circles exist, we need to select
     .append('circle'); //for each data object that hasn't been attached, append a <circle> to the <svg>
 
 d3.selectAll('circle')
-    .attr('cy', function(datum, index){
+    .attr('cy', (datum, index) => {
         return yScale(datum.distance);
     });
 ```
