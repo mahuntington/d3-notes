@@ -586,7 +586,7 @@ Just for debugging purposes, let's create a table which will show all of our dat
         <tbody>
         </tbody>
     </table>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="app.js" charset="utf-8"></script>
 </body>
 ```
@@ -594,9 +594,9 @@ Just for debugging purposes, let's create a table which will show all of our dat
 D3 can also be used to manipulate the DOM, just like jQuery.  Let's populate the `<tbody>` in that style.  Add the following to the bottom of `app.js`:
 
 ```javascript
-var createTable = function(){
-    for (var i = 0; i < runs.length; i++) {
-        var row = d3.select('tbody').append('tr');
+const createTable = () => {
+    for (let i = 0; i < runs.length; i++) {
+        const row = d3.select('tbody').append('tr');
         row.append('td').html(runs[i].id);
         row.append('td').html(runs[i].date);
         row.append('td').html(runs[i].distance);
@@ -636,14 +636,14 @@ Now the browser should look like this:
 Let's say that we want it so that when the user clicks on the `<svg>` element, it creates a new run.  Add the following to the bottom of `app.js`:
 
 ```javascript
-d3.select('svg').on('click', function(){
-    var x = d3.event.offsetX; //gets the x position of the mouse relative to the svg element
-    var y = d3.event.offsetY; //gets the y position of the mouse relative to the svg element
+d3.select('svg').on('click', (event) => {
+    const x = event.offsetX; //gets the x position of the mouse relative to the svg element
+    const y = event.offsetY; //gets the y position of the mouse relative to the svg element
 
-    var date = xScale.invert(x) //get a date value from the visual point that we clicked on
-    var distance = yScale.invert(y); //get a numeric distance value from the visual point that we clicked on
+    const date = xScale.invert(x) //get a date value from the visual point that we clicked on
+    const distance = yScale.invert(y); //get a numeric distance value from the visual point that we clicked on
 
-    var newRun = { //create a new "run" object
+    const newRun = { //create a new "run" object
         id: runs[runs.length-1].id+1, //generate a new id by adding 1 to the last run's id
         date: formatTime(date), //format the date object created above to a string
         distance: distance //add the distance
@@ -662,14 +662,14 @@ Click on the SVG to create a new run.  You might notice that `createTable()` jus
 Let's alter the `createTable()` function so that when it runs, it clears out any rows previously created and re-renders everything.  Add `d3.select('tbody').html('')` to the top of the `createTable` function in `app.js`:
 
 ```javascript
-var createTable = function(){
-    d3.select('tbody').html(''); //clear out all rows from the table
-    for (var i = 0; i < runs.length; i++) {
-        var row = d3.select('tbody').append('tr');
-        row.append('td').html(runs[i].id);
-        row.append('td').html(runs[i].date);
-        row.append('td').html(runs[i].distance);
-    }
+const createTable = () => {
+	d3.select('tbody').html(''); //clear out all rows from the table
+	for (let i = 0; i < runs.length; i++) {
+		const row = d3.select('tbody').append('tr');
+		row.append('td').html(runs[i].id);
+		row.append('td').html(runs[i].date);
+		row.append('td').html(runs[i].distance);
+	}
 }
 ```
 
@@ -680,92 +680,97 @@ Now refresh the page, and click on the SVG to create a new run.  The table shoul
 The only issue now is that circles aren't being created when you click on the SVG.  To fix this, let's wrap the code for creating `<circle>` elements in a render function, and call `render()` immediately after it's defined:
 
 ```javascript
-var render = function(){
+const render = ()=>{
 
-    var yScale = d3.scaleLinear();
-    yScale.range([HEIGHT, 0]);
-    yDomain = d3.extent(runs, function(datum, index){
-        return datum.distance;
-    })
-    yScale.domain(yDomain);
+	const yScale = d3.scaleLinear(); //create the scale
+	yScale.range([HEIGHT, 0]); //set the visual range (e.g. 600 to 0)
+	const yDomain = d3.extent(runs, (datum, index) => {
+		return datum.distance; //compare distance properties of each item in the data array
+	})
+	yScale.domain(yDomain);
 
-    d3.select('svg').selectAll('circle')
-        .data(runs)
-        .enter()
-        .append('circle');
+	d3.select('svg').selectAll('circle') //since no circles exist, we need to select('svg') so that d3 knows where to append the new circles
+		.data(runs) //attach the data as before
+		.enter() //find the data objects that have not yet been attached to visual elements
+		.append('circle'); //for each data object that hasn't been attached, append a <circle> to the <svg>
 
-    d3.selectAll('circle')
-        .attr('cy', function(datum, index){
-            return yScale(datum.distance);
-        });
 
-    var parseTime = d3.timeParse("%B%e, %Y at %-I:%M%p");
-    var formatTime = d3.timeFormat("%B%e, %Y at %-I:%M%p");
-    var xScale = d3.scaleTime();
-    xScale.range([0,WIDTH]);
-    xDomain = d3.extent(runs, function(datum, index){
-        return parseTime(datum.date);
-    });
-    xScale.domain(xDomain);
+	d3.selectAll('circle').data(runs)
+		.attr('cy', (datum, index) => {
+			return yScale(datum.distance);
+		});
 
-    d3.selectAll('circle')
-        .attr('cx', function(datum, index){
-            return xScale(parseTime(datum.date));
-        });
+	const parseTime = d3.timeParse("%B%e, %Y at %-I:%M%p");
+	const formatTime = d3.timeFormat("%B%e, %Y at %-I:%M%p");
+	const xScale = d3.scaleTime();
+	xScale.range([0,WIDTH]);
+	const xDomain = d3.extent(runs, (datum, index) => {
+		return parseTime(datum.date);
+	});
+	xScale.domain(xDomain);
+
+	d3.selectAll('circle')
+		.attr('cx', (datum, index) => {
+			return xScale(parseTime(datum.date)); //use parseTime to convert the date string property on the datum object to a Date object, which xScale then converts to a visual value
+		});
 
 }
+
 render();
 ```
 
 If you refresh the browser, you'll see an error in the console.  This is because the `bottomAxis` and `leftAxis` use `xScale` and `yScale` which are now scoped to exist only inside the `render()` function.  For future use, let's move the `xScale` and `yScale` out of the render function along with the code for creating the domains/ranges:
 
 ```javascript
-var parseTime = d3.timeParse("%B%e, %Y at %-I:%M%p");
-var formatTime = d3.timeFormat("%B%e, %Y at %-I:%M%p");
-var xScale = d3.scaleTime();
+const parseTime = d3.timeParse("%B%e, %Y at %-I:%M%p");
+const formatTime = d3.timeFormat("%B%e, %Y at %-I:%M%p");
+const xScale = d3.scaleTime();
 xScale.range([0,WIDTH]);
-xDomain = d3.extent(runs, function(datum, index){
-    return parseTime(datum.date);
+const xDomain = d3.extent(runs, (datum, index) => {
+	return parseTime(datum.date);
 });
 xScale.domain(xDomain);
 
-var yScale = d3.scaleLinear();
-yScale.range([HEIGHT, 0]);
-yDomain = d3.extent(runs, function(datum, index){
-    return datum.distance;
+const yScale = d3.scaleLinear(); //create the scale
+yScale.range([HEIGHT, 0]); //set the visual range (e.g. 600 to 0)
+const yDomain = d3.extent(runs, (datum, index) => {
+	return datum.distance; //compare distance properties of each item in the data array
 })
 yScale.domain(yDomain);
-var render = function(){
 
-    d3.select('svg').selectAll('circle') //since no circles exist, we need to select('svg') so that d3 knows where to append the new circles
-        .data(runs) //attach the data as before
-        .enter() //find the data objects that have not yet been attached to visual elements
-        .append('circle'); //for each data object that hasn't been attached, append a <circle> to the <svg>
+const render = ()=>{
 
-    d3.selectAll('circle')
-        .attr('cy', function(datum, index){
-            return yScale(datum.distance);
-        });
+	d3.select('svg').selectAll('circle') //since no circles exist, we need to select('svg') so that d3 knows where to append the new circles
+		.data(runs) //attach the data as before
+		.enter() //find the data objects that have not yet been attached to visual elements
+		.append('circle'); //for each data object that hasn't been attached, append a <circle> to the <svg>
 
-    d3.selectAll('circle')
-        .attr('cx', function(datum, index){
-            return xScale(parseTime(datum.date)); //use parseTime to convert the date string property on the datum object to a Date object, which xScale then converts to a visual value
-        });
+
+	d3.selectAll('circle').data(runs)
+		.attr('cy', (datum, index) => {
+			return yScale(datum.distance);
+		});
+
+	d3.selectAll('circle')
+		.attr('cx', (datum, index) => {
+			return xScale(parseTime(datum.date)); //use parseTime to convert the date string property on the datum object to a Date object, which xScale then converts to a visual value
+		});
 
 }
+
 render();
 ```
 
 Now go to the bottom of `app.js` and add a line to call `render()` inside our `<svg>` click handler:
 
 ```javascript
-var newRun = { //create a new "run" object
-    id: runs[runs.length-1].id+1, //generate a new id by adding 1 to the last run's id
-    date: formatTime(date), //format the date object created above to a string
-    distance: distance //add the distance
+const newRun = { //create a new "run" object
+	id: runs[runs.length-1].id+1, //generate a new id by adding 1 to the last run's id
+	date: formatTime(date), //format the date object created above to a string
+	distance: distance //add the distance
 }
-runs.push(newRun);
-createTable();
+runs.push(newRun); //push the new run onto the runs array
+createTable(); //render the table
 render(); //add this line
 ```
 
