@@ -653,7 +653,7 @@ d3.select('svg').on('click', (event) => {
 });
 ```
 
-Let's examine what we just wrote.  `d3.select('svg').on('click', ()=>{` Sets up a click handler on the `svg` element.  The anonymous function that gets passed in as the second parameter to `.on()` gets called each time the user clicks on the SVG.  Once inside that callback function, we use `event.offsetX` to get the x position of the mouse inside the SVG and `d3.event.offsetY` to get the y position.  We then use `xScale.invert()` and `yScale.invert()` to turn the x/y visual points into data values (date and distance, respectively).  We then use those data values to create a new run object.  We create an id for the new run by getting the id of the last element in the `runs` array and adding 1 to it.  Lastly, we push the new run onto the `runs` array and call `createTable()`.
+Let's examine what we just wrote.  `d3.select('svg').on('click', (event)=>{` Sets up a click handler on the `svg` element.  The anonymous function that gets passed in as the second parameter to `.on()` gets called each time the user clicks on the SVG.  Once inside that callback function, we use `event.offsetX` to get the x position of the mouse inside the SVG and `event.offsetY` to get the y position.  We then use `xScale.invert()` and `yScale.invert()` to turn the x/y visual points into data values (date and distance, respectively).  We then use those data values to create a new run object.  We create an id for the new run by getting the id of the last element in the `runs` array and adding 1 to it.  Lastly, we push the new run onto the `runs` array and call `createTable()`.
 
 Click on the SVG to create a new run.  You might notice that `createTable()` just adds on all the run rows again
 
