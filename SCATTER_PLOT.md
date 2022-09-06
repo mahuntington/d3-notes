@@ -124,7 +124,7 @@ In `app.js` let's create an array of "run" objects (**NOTE:** I'm storing the da
 const WIDTH = 800;
 const HEIGHT = 600;
 
-const runs = [
+let runs = [
     {
         id: 1,
         date: 'October 1, 2017 at 4:00PM',
@@ -653,7 +653,7 @@ d3.select('svg').on('click', (event) => {
 });
 ```
 
-Let's examine what we just wrote.  `d3.select('svg').on('click', function(){` Sets up a click handler on the `svg` element.  The anonymous function that gets passed in as the second parameter to `.on()` gets called each time the user clicks on the SVG.  Once inside that callback function, we use `d3.event.offsetX` to get the x position of the mouse inside the SVG and `d3.event.offsetY` to get the y position.  We then use `xScale.invert()` and `yScale.invert()` to turn the x/y visual points into data values (date and distance, respectively).  We then use those data values to create a new run object.  We create an id for the new run by getting the id of the last element in the `runs` array and adding 1 to it.  Lastly, we push the new run onto the `runs` array and call `createTable()`.
+Let's examine what we just wrote.  `d3.select('svg').on('click', ()=>{` Sets up a click handler on the `svg` element.  The anonymous function that gets passed in as the second parameter to `.on()` gets called each time the user clicks on the SVG.  Once inside that callback function, we use `event.offsetX` to get the x position of the mouse inside the SVG and `d3.event.offsetY` to get the y position.  We then use `xScale.invert()` and `yScale.invert()` to turn the x/y visual points into data values (date and distance, respectively).  We then use those data values to create a new run object.  We create an id for the new run by getting the id of the last element in the `runs` array and adding 1 to it.  Lastly, we push the new run onto the `runs` array and call `createTable()`.
 
 Click on the SVG to create a new run.  You might notice that `createTable()` just adds on all the run rows again
 
@@ -784,9 +784,9 @@ Let's set up a click handler on all `<circle>` elements so that when the user cl
 
 ```javascript
 //put this at the bottom of the render function, so that click handlers are attached when the circle is created
-d3.selectAll('circle').on('click', function(datum, index){
-    d3.event.stopPropagation(); //stop click event from propagating to the SVG element and creating a run
-    runs = runs.filter(function(run, index){ //create a new array that has removed the run with the correct id.  Set it to the runs var
+d3.selectAll('circle').on('click', (event, datum) => {
+    event.stopPropagation(); //stop click event from propagating to the SVG element and creating a run
+    runs = runs.filter((run, index) => { //create a new array that has removed the run with the correct id.  Set it to the runs var
         return run.id != datum.id;
     });
     render(); //re-render dots
@@ -794,7 +794,7 @@ d3.selectAll('circle').on('click', function(datum, index){
 });
 ```
 
-Let's examine the above code.  The first line selects all `<circle>` elements and creates a click handler on each of them.  `d3.event.stopPropagation();` prevents the our click from bubbling up the DOM to the SVG.  If we don't add it, the click handler on the SVG will fire in addition, when we click on a circle.  This would create an additional run every time we try to remove a run.  Next we call:
+Let's examine the above code.  The first line selects all `<circle>` elements and creates a click handler on each of them.  `event.stopPropagation();` prevents the our click from bubbling up the DOM to the SVG.  If we don't add it, the click handler on the SVG will fire in addition, when we click on a circle.  This would create an additional run every time we try to remove a run.  Next we call:
 
 ```javascript
 runs = runs.filter(function(run, index){
@@ -802,7 +802,7 @@ runs = runs.filter(function(run, index){
 });
 ```
 
-This loops through the `runs` array and filters out any objects that have an `id` property that matches that of the `id` property of the `datum` that is associated with the `<circle>` that was clicked.  Notice that the callback function in `.on('click', function(datum, index){` takes two parameters: `datum`, the "run" object associated with that `<circle>` and the `index` of the that "run" object in the `runs` array.
+This loops through the `runs` array and filters out any objects that have an `id` property that matches that of the `id` property of the `datum` that is associated with the `<circle>` that was clicked.  Notice that the callback function in `.on('click', (event, datum) => {` takes two parameters: `event`, the event object, and `datum`, the "run" object associated with the `<circle>` that was clicked.
 
 Once we've filtered out the correct "run" object from the `runs` array, we call `render()` and `createdTable()` to re-render the the graph and the table.
 
@@ -842,7 +842,7 @@ If you try to delete all the circles and then add a new one, you'll get an error
 This is because, our code for creating a `newRun` in the SVG click handler needs some work:
 
 ```javascript
-var newRun = { //create a new "run" object
+const newRun = { //create a new "run" object
     id: runs[runs.length-1].id+1, //generate a new id by adding 1 to the last run's id
     date: formatTime(date), //format the date object created above to a string
     distance: distance //add the distance
@@ -853,7 +853,7 @@ This is because when there are no run elements in the `runs` array,`runs[runs.le
 
 ```javascript
 //inside svg click handler
-var newRun = {
+const newRun = {
     id: ( runs.length > 0 ) ? runs[runs.length-1].id+1 : 1, //add this line
     date: formatTime(date),
     distance: distance
