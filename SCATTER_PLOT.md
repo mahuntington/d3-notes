@@ -904,29 +904,29 @@ There are two steps whenever we create a behavior:
 Put the following code at the bottom of the `render()` function declaration:
 
 ```javascript
-var drag = function(datum){
-    var x = d3.event.x;
-    var y = d3.event.y;
-    d3.select(this).attr('cx', x);
-    d3.select(this).attr('cy', y);
+const drag = function(event, datum) {
+	const x = event.x;
+	const y = event.y;
+	d3.select(this).attr('cx', x);
+	d3.select(this).attr('cy', y);
 }
-var dragBehavior = d3.drag()
-    .on('drag', drag);
-d3.selectAll('circle').call(dragBehavior);
+const dragBehavior = d3.drag()
+	.on('drag', drag);
+d3.selectAll('circle').call(dragBehavior);	
 ```
 
-You can now drag the circles around, but the data doesn't update:
+We use the old `function()` syntax so that `this` will point to the object being dragged.  This works better than `event.sourceEvent.target` which can change to the parent `svg` element depending on how quickly you drag.  You can now drag the circles around, but the data doesn't update:
 
 ![](https://i.imgur.com/4pLzqt7.png)
 
 Let's examine how this code works:
 
 ```javascript
-var drag = function(datum){
-    var x = d3.event.x;
-    var y = d3.event.y;
-    d3.select(this).attr('cx', x);
-    d3.select(this).attr('cy', y);
+const drag = function(event, datum) {
+	const x = event.x;
+	const y = event.y;
+	d3.select(this).attr('cx', x);
+	d3.select(this).attr('cy', y);
 }
 ```
 
@@ -935,8 +935,8 @@ This `drag` function will be used as a callback anytime the user moves the curso
 Next we generate a drag behavior that will, at the appropriate time, call the `drag` function that was just explained:
 
 ```javascript
-var dragBehavior = d3.drag()
-    .on('drag', drag);
+const dragBehavior = d3.drag()
+	.on('drag', drag);
 ```
 
 Lastly, we attach that behavior to all `<circle>` elements:
