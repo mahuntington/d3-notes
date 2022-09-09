@@ -952,30 +952,30 @@ Now we're going to add functionality so that when the user releases the "mouse" 
 First lets create the callback function that will get called when the user releases the "mouse" button.  Towards the bottom of the `render()` function declaration, add the following code just above `var drag = function(datum){`:
 
 ```javascript
-var dragEnd = function(datum){
-    var x = d3.event.x;
-    var y = d3.event.y;
+const dragEnd = (event, datum) => {
+	const x = event.x;
+	const y = event.y;
 
-    var date = xScale.invert(x);
-    var distance = yScale.invert(y);
+	const date = xScale.invert(x);
+	const distance = yScale.invert(y);
 
-    datum.date = formatTime(date);
-    datum.distance = distance;
-    createTable();
+	datum.date = formatTime(date);
+	datum.distance = distance;
+	createTable();
 }
 ```
 
 Now attach that function to the `dragBehavior` so that it is called when the user stops dragging a circle.  Change the following code:
 
 ```javascript
-var dragBehavior = d3.drag()
+const dragBehavior = d3.drag()
     .on('drag', drag);
 ```
 
 to this:
 
 ```javascript
-var dragBehavior = d3.drag()
+const dragBehavior = d3.drag()
     .on('drag', drag)
     .on('end', dragEnd);
 ```
