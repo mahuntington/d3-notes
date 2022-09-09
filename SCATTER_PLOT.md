@@ -797,7 +797,7 @@ d3.selectAll('circle').on('click', (event, datum) => {
 Let's examine the above code.  The first line selects all `<circle>` elements and creates a click handler on each of them.  `event.stopPropagation();` prevents the our click from bubbling up the DOM to the SVG.  If we don't add it, the click handler on the SVG will fire in addition, when we click on a circle.  This would create an additional run every time we try to remove a run.  Next we call:
 
 ```javascript
-runs = runs.filter(function(run, index){
+runs = runs.filter((run, index)=>{
     return run.id != datum.id;
 });
 ```
