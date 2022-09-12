@@ -6,6 +6,8 @@ The topics that we will cover in this chapter include:
 1. Define GeoJSON
 1. Use a projection
 1. Generate a `<path>` using a projection and the GeoJSON data
+1. Create a rectangular overlay based on coordinates entered into a form
+1. Draw a rectangle on the map and display its map coordinates
 
 In this section we'll generate `<path>` elements from GeoJSON data that will draw a map of the world
 
@@ -110,7 +112,7 @@ Let's set up a basic D3 page:
     <meta charset="utf-8">
     <title></title>
     <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
-    <script src="https://cdn.rawgit.com/mahuntington/mapping-demo/master/map_data3.js" charset="utf-8"></script>
+    <script src="https://cdn.rawgit.com/mahuntington/mapping-demo/master/map_data.js" charset="utf-8"></script>
 </head>
 <body>
     <svg></svg>
@@ -122,7 +124,7 @@ Let's set up a basic D3 page:
 The only thing different from the setup that we've used in previous chapters is this line:
 
 ```html
-<script src="https://cdn.rawgit.com/mahuntington/mapping-demo/master/map_data3.js" charset="utf-8"></script>
+<script src="https://cdn.rawgit.com/mahuntington/mapping-demo/master/map_data.js" charset="utf-8"></script>
 ```
 
 This just loads an external javascript file which sets our GeoJSON data to a variable.  Here's what the beginning of it looks like:
@@ -158,8 +160,8 @@ In production, you would probably make an AJAX call to get this data, or at the 
 Now let's start our `app.js` file:
 
 ```javascript
-var width = 960;
-var height = 490;
+const width = 960;
+const height = 490;
 
 d3.select('svg')
     .attr('width', width)
@@ -169,7 +171,7 @@ d3.select('svg')
 At the bottom of `app.js` let's add:
 
 ```javascript
-var worldProjection = d3.geoEquirectangular();
+const worldProjection = d3.geoEquirectangular();
 ```
 
 This generates a projection, which governs how we're going to display a round world on a flat screen.  There's lots of different types of projections we can use: https://github.com/d3/d3-geo/blob/master/README.md#azimuthal-projections
@@ -197,7 +199,7 @@ We created the `path` elements, but they each need a `d` attribute which will de
 We want something like:
 
 ```javascript
-d3.selectAll('path').attr('d', function(datum, index){
+d3.selectAll('path').attr('d', (datum, index)=>{
     //somehow use datum to generate the value for the 'd' attributes
 });
 ```
@@ -205,15 +207,60 @@ d3.selectAll('path').attr('d', function(datum, index){
 Writing the kind of code described in the comment above would be very difficult.  Luckily, D3 can generate that entire function for us.  All we need to do is specify the projection that we created earlier.  At the bottom of `app.js` add the following:
 
 ```javascript
-var dAttributeFunction = d3.geoPath()
+const dAttributeFunction = d3.geoPath()
     .projection(worldProjection);
 
 d3.selectAll('path').attr('d', dAttributeFunction);
 ```
 
-`geoPath()` generates the function that we'll use for the `d` attribute, and `projection(worldProjection)` tells it to use the `worldProjection` var created earlier so that the `path` elements appear as an equirectangular projection like this (This is helpful because we can use different projects to view a round world on a flat screen in different ways):
+`geoPath()` generates the function that we'll use for the `d` attribute, and `projection(worldProjection)` tells it to use the `worldProjection` var created earlier so that the `path` elements appear as an equirectangular projection like this (This is helpful because we can use different projections to view a round world on a flat screen in different ways):
 
 ![](https://i.imgur.com/hX7hOoB.png)
+
+## Create a rectangular overlay based on coordinates entered into a form
+
+```html
+<form>
+    Top Left:
+    <input type="text" placeholder="latitude"/>
+    <input type="text" placeholder="longitude"/>
+    <br/>
+    Bottom Right:
+    <input type="text" placeholder="latitude"/>
+    <input type="text" placeholder="longitude"/>
+
+    <input type="submit"/>
+</form>
+```
+
+```js
+d3.select('form').on('submit', (event) => { //set up a submit handler on the form
+	event.preventDefault(); // stop the form from submitting
+
+	d3.selectAll('rect').remove(); //remove any previously drawn rectangles
+
+	const lat1 = d3.select('input:first-child').property('value'); //get first latitude input
+	const lng1 = d3.select('input:nth-child(2)').property('value'); //get first longitude input
+	const location1 = worldProjection([lat1, lng1]); //convert these into pixel coordinates
+	const x1 = location1[0]; //reassign for ease of reading
+	const y1 = location1[1];
+
+	const lat2 = d3.select('input:nth-child(4)').property('value'); //get second latitude input (the <br/> is :nth-child(3)
+	const lng2 = d3.select('input:nth-child(5)').property('value'); //get second longitude input
+	const location2 = worldProjection([lat2, lng2]); //convert these into pixel coordinates
+	const x2 = location2[0]; //reassign for eas of reading
+	const y2 = location2[1];
+
+	d3.select('svg').append('rect') // append a rectangle to the svg
+		.attr('fill', '#000') //make it black
+		.attr('x', x1) //assign top left x location
+		.attr('y', y1) //assign top left y location
+		.attr('width', x2-x1) //compute width from bottom right x coordinate
+		.attr('height', y2-y1) //compute height from bottom right y coordinate
+});
+```
+
+## Draw a rectangle on the map and display its map coordinates
 
 ## Conclusion
 
