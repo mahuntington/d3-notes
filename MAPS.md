@@ -111,7 +111,7 @@ Let's set up a basic D3 page:
 <head>
     <meta charset="utf-8">
     <title></title>
-    <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
+    <script src="https://d3js.org/d3.v7.min.js" charset="utf-8"></script>
     <script src="https://cdn.rawgit.com/mahuntington/mapping-demo/master/map_data.js" charset="utf-8"></script>
 </head>
 <body>
