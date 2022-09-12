@@ -363,7 +363,7 @@ d3.selectAll('rect').remove(); //remove any previously drawn rectangles
 d3.select('svg').append('rect') //draw a rectangle of 0 height/width at the point where the drag started
 	.attr('x', event.x)
 	.attr('y', event.y);
-``
+```
 
 The finished drag behavior:
 
