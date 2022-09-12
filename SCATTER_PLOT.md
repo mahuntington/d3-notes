@@ -1201,7 +1201,7 @@ change it to this:
 
 ```javascript
 d3.select('#points').html('');
-var circles = d3.select('#points')
+const circles = d3.select('#points')
     .selectAll('circle')
     .data(runs);
 circles.enter().append('circle');
@@ -1220,7 +1220,7 @@ If we click on the middle circle (2nd), it deletes the 2nd "run" object in the `
 To avoid these affects, we need to make sure that each circle stays with the data it used to be assigned to when we call `render()`.  To do this, we can tell D3 to map `<circles>` to datum by id, rather than index in the array.  At the top of the `render()` function, find this code:
 
 ```javascript
-var circles = d3.select('#points')
+const circles = d3.select('#points')
     .selectAll('circle')
     .data(runs);
 ```
@@ -1228,11 +1228,11 @@ var circles = d3.select('#points')
 Change it to this:
 
 ```javascript
-var circles = d3.select('#points')
-    .selectAll('circle')
-    .data(runs, function(datum){
-      return datum.id
-    });
+const circles = d3.select('#points')
+	.selectAll('circle')
+	.data(runs, (datum)=>{
+		return datum.id
+	});
 ```
 
 This tells D3 to use the `id` property of each "run" object when determining which `<circle>` element to assign the data object to.  It basically assigns that `id` property of the "run" object to the `<circle>` element initially.  That way, when the 2nd "run" object is deleted, `circles.exit().remove();` will find the circle that had the corresponding id (the middle circle) and remove it.
