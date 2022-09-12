@@ -262,6 +262,57 @@ d3.select('form').on('submit', (event) => { //set up a submit handler on the for
 
 ## Draw a rectangle on the map and display its map coordinates
 
+```html
+<table border="1">
+	<tr>
+		<th>lat</th>
+		<th>lng</th>
+	</tr>
+	<tr>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td></td>
+	</tr>
+</table>
+```
+
+```js
+const dragBehavior = d3.drag() //set up the behavior
+	.on('start', (event) => { //create the start handler
+		d3.select('table tr:nth-child(2) td:first-child') //select the top left cell of the table. The table header is tr:nth-child(1)
+			//use worldProject to convert the x/y pixel coordinates of the mouse click into lat/lng map coordinates
+			//this takes as params [x,y] and returns [lat,lng]
+			//insert the first element of the map coords array (lat) into the html of the table cell
+			.html(worldProjection.invert([event.x, event.y])[0]) 
+		d3.select('table tr:nth-child(2) td:last-child') //select the top right cell of the table
+			//insert the second element of the map coords array (lng) into the html of the table cell
+			.html(worldProjection.invert([event.x, event.y])[1])
+
+		d3.selectAll('rect').remove(); //remove any previously drawn rectangles
+		d3.select('svg').append('rect') //draw a rectangle of 0 height/width at the point where the drag started
+			.attr('x', event.x)
+			.attr('y', event.y);
+	})
+	.on('drag', (event) => { //create the drag handler
+		d3.select('table tr:nth-child(3) td:first-child') //select the bottom left cell of the table
+			//insert the first element of the map coords array (lat) into the html of the table cell
+			.html(worldProjection.invert([event.x, event.y])[0])
+		d3.select('table tr:nth-child(3) td:last-child') //select the bottom right cell of the table
+			//insert the second element of the map coords array (lng) into the html of the table cell
+			.html(worldProjection.invert([event.x, event.y])[1])
+
+		//computer width of the box based on current x value and current rect's x value
+		d3.select('rect').attr('width', event.x-d3.select('rect').attr('x'))
+		//computer height of the box based on current y value and current rect's y value
+		d3.select('rect').attr('height', event.y-d3.select('rect').attr('y'))
+	})
+
+d3.select('svg').call(dragBehavior); //atach dragBehavior to the svg
+```
+
 ## Conclusion
 
 In this section we've covered how to use D3 to create a projection and render GeoJSON data as a map, and we've learned about using different projects to visualize the world.  This can be helpful when displaying populations or perhaps average rainfall of various regions.  Congratulations! You've made it to the end of this book. Now go off and create amazing visualizations.
