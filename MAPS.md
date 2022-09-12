@@ -312,6 +312,8 @@ d3.select('form').on('submit', (event) => { //set up a submit handler on the for
 
 ## Draw a rectangle on the map and display its map coordinates
 
+First create a table in our HTML.  Once the user draws the rectangle on the map, we'll have the app fill the data in here appropriately:
+
 ```html
 <table border="1">
 	<tr>
@@ -328,6 +330,42 @@ d3.select('form').on('submit', (event) => { //set up a submit handler on the for
 	</tr>
 </table>
 ```
+
+Now set up a `drag` behavior and attach it to the SVG:
+
+```js
+const dragBehavior = d3.drag() //set up the behavior
+	.on('start', (event) => { //create the start handler
+	})
+	.on('drag', (event) => { //create the drag handler
+	})
+
+d3.select('svg').call(dragBehavior); //atach dragBehavior to the svg
+```
+
+Next, let's use `worldProjection.invert()` to take visual x/y coordinates and convert them into lat/lng coordinates.  Has parameters, it takes an array containing x and y pixel coordinates `[x,y]`, and it returns and array containing lat and lang coordinates `[lat,lng]`.  We'll use `worldProjection.invert([event.x, event.y])[0]` to get the latitude and `worldProjection.invert([event.x, event.y])[1]` to get the longitude.  At the bottom of the start handler, add the following:
+
+```js
+d3.select('table tr:nth-child(2) td:first-child') //select the top left cell of the table. The table header is tr:nth-child(1)
+	//use worldProject to convert the x/y pixel coordinates of the mouse click into lat/lng map coordinates
+	//this takes as params [x,y] and returns [lat,lng]
+	//insert the first element of the map coords array (lat) into the html of the table cell
+	.html(worldProjection.invert([event.x, event.y])[0]) 
+d3.select('table tr:nth-child(2) td:last-child') //select the top right cell of the table
+	//insert the second element of the map coords array (lng) into the html of the table cell
+	.html(worldProjection.invert([event.x, event.y])[1])
+```
+
+Now we want to begin drawing the rectangle.  We'll start with a rectangle of 0 height and 0 width, at the point the user clicked.  Add the following at the bottom of the start hander:
+
+```js
+d3.selectAll('rect').remove(); //remove any previously drawn rectangles
+d3.select('svg').append('rect') //draw a rectangle of 0 height/width at the point where the drag started
+	.attr('x', event.x)
+	.attr('y', event.y);
+``
+
+The finished drag behavior:
 
 ```js
 const dragBehavior = d3.drag() //set up the behavior
