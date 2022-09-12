@@ -1264,31 +1264,31 @@ d3.select('#container')
 //
 // lots of code omitted here, including render() declaration...
 //
-var bottomAxis = d3.axisBottom(xScale);
+const bottomAxis = d3.axisBottom(xScale);
 d3.select('#container')
 	.append('g')
-    .attr('id', 'x-axis')
+	.attr('id', 'x-axis')
 	.call(bottomAxis)
-    .attr('transform', 'translate(0,'+HEIGHT+')');
+	.attr('transform', 'translate(0,'+HEIGHT+')');
 
-var leftAxis = d3.axisLeft(yScale);
+const leftAxis = d3.axisLeft(yScale);
 d3.select('#container')
 	.append('g')
-    .attr('id', 'y-axis')
+	.attr('id', 'y-axis')
 	.call(leftAxis);
 //
 // code for create table omitted here...
 //
-d3.select('#container').on('click', function(){
-//
-// click handler functionality omitted
-//
+d3.select('#container').on('click', (event)=>{
+	//
+	// click handler functionality omitted
+	//
 });
 //
 // zoomCallback code omitted here
 //
-var zoom = d3.zoom()
-    .on('zoom', zoomCallback);
+const zoom = d3.zoom()
+	.on('zoom', zoomCallback);
 d3.select('#container').call(zoom);    
 ```
 
