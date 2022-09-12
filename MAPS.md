@@ -219,6 +219,8 @@ d3.selectAll('path').attr('d', dAttributeFunction);
 
 ## Create a rectangular overlay based on coordinates entered into a form
 
+First, let's create a form for the user to enter lat/lng coordinates for the top/left and bottom/right portions of the box:
+
 ```html
 <form>
     Top Left:
@@ -232,6 +234,54 @@ d3.selectAll('path').attr('d', dAttributeFunction);
     <input type="submit"/>
 </form>
 ```
+
+- Create a submit handler for the form
+- Prevent its default behavior of submitting so we stay on the page
+- Remove any rectangles that may have previously been drawn
+
+```js
+d3.select('form').on('submit', (event) => { //set up a submit handler on the form
+	event.preventDefault(); // stop the form from submitting
+})
+```
+
+At the bottom of the submit handler, retrieve what the user entered in the inputs for the top left coordinate:
+
+```js
+const lat1 = d3.select('input:first-child').property('value'); //get first latitude input
+const lng1 = d3.select('input:nth-child(2)').property('value'); //get first longitude input
+```
+
+Now we'll use `worldProjection()` like our previous scales to convert a data point into pixel coordinates.  It takes as a parameter, an array containing a latitude value and a longitude value (`[lat,lng]`).  It returns an array containing x and y coordinates (`[x,y]`).  Place the following at the bottom of your submit handler:
+
+```js
+const location1 = worldProjection([lat1, lng1]); //convert these into pixel coordinates
+const x1 = location1[0]; //reassign for ease of reading
+const y1 = location1[1];
+```
+
+Do the same for the second for bottom right coordinate inputs (keep in mind, in the html the `<br/>` tag is the 3rd child of its parent, so the 3rd and 4th inputs are actually `nth-child(4)` and `nth-child(5)`:
+
+```js
+const lat2 = d3.select('input:nth-child(4)').property('value'); //get second latitude input (the <br/> is :nth-child(3)
+const lng2 = d3.select('input:nth-child(5)').property('value'); //get second longitude input
+const location2 = worldProjection([lat2, lng2]); //convert these into pixel coordinates
+const x2 = location2[0]; //reassign for eas of reading
+const y2 = location2[1];
+```
+
+Lastly, create the rectangle by appending it to the SVG, filling it with black, assigning the top left x/y coordinates and computing the height/width using the `x2` and `y2` coordinates:
+
+```js
+d3.select('svg').append('rect') // append a rectangle to the svg
+	.attr('fill', '#000') //make it black
+	.attr('x', x1) //assign top left x location
+	.attr('y', y1) //assign top left y location
+	.attr('width', x2-x1) //compute width from bottom right x coordinate
+	.attr('height', y2-y1) //compute height from bottom right y coordinate
+```
+
+The finished submit handler:
 
 ```js
 d3.select('form').on('submit', (event) => { //set up a submit handler on the form
