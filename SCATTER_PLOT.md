@@ -1060,7 +1060,7 @@ d3.select('svg')
 Now let's use those ids to adjust the axes when we zoom.  Find this code:
 
 ```javascript
-const zoomCallback = function(event){
+const zoomCallback = (event) => {
 	d3.select('#points').attr("transform", event.transform);
 }
 ```
@@ -1080,9 +1080,9 @@ Your zoomCallback should now look like this:
 const zoomCallback = function(event){
 	d3.select('#points').attr("transform", event.transform);
 	d3.select('#x-axis')
-		.call(bottomAxis.scale(d3.event.transform.rescaleX(xScale)));
+		.call(bottomAxis.scale(event.transform.rescaleX(xScale)));
 	d3.select('#y-axis')
-		.call(leftAxis.scale(d3.event.transform.rescaleY(yScale)));
+		.call(leftAxis.scale(event.transform.rescaleY(yScale)));
 }
 ```
 
@@ -1099,17 +1099,17 @@ Now when you zoom out, the axes should redraw themselves:
 
 Try zoom/panning and the clicking on the SVG to create a new run.  You'll notice it's in the wrong place.  That's because the SVG click handler has no idea that a zoom/pan has happened.  Currently, if you click on the visual point, no matter how much you may have zoomed/panned, the click handler still converts it as if you had never zoomed/panned.
 
-When we zoom, we need to save the transformation information to a variable so that we can use it later to figure out how to properly create circles and runs.  Find the `zoomCallback` declaration and add `var lastTransform = null` right before it.  Then add `lastTransform = d3.event.transform;` at the beginning of the function declaration.  It should look like this:
+When we zoom, we need to save the transformation information to a variable so that we can use it later to figure out how to properly create circles and runs.  Find the `zoomCallback` declaration and add `let lastTransform = null` right before it.  Then add `lastTransform = event.transform;` at the beginning of the function declaration.  It should look like this:
 
 ```javascript
-var lastTransform = null; //add this
-var zoomCallback = function(){
-    lastTransform = d3.event.transform; //add this
-	d3.select('#points').attr("transform", d3.event.transform);
-    d3.select('#x-axis')
-        .call(bottomAxis.scale(d3.event.transform.rescaleX(xScale)));
+let lastTransform = null; //add this
+const zoomCallback = (event) => {
+	lastTransform = event.transform; //add this
+	d3.select('#points').attr("transform", event.transform);
+	d3.select('#x-axis')
+		.call(bottomAxis.scale(event.transform.rescaleX(xScale)));
 	d3.select('#y-axis')
-        .call(leftAxis.scale(d3.event.transform.rescaleY(yScale)));
+		.call(leftAxis.scale(event.transform.rescaleY(yScale)));
 }
 ```
 
@@ -1118,28 +1118,28 @@ Now, whenever the user zooms/pans the transform that was used to adjust the SVG 
 Find these two lines at the beginning of the SVG click handler:
 
 ```javascript
-var x = d3.event.offsetX;
-var y = d3.event.offsetY;
+const x = event.offsetX;
+const y = event.offsetY;
 ```
 
 change them to:
 
 ```javascript
-var x = lastTransform.invertX(d3.event.offsetX);
-var y = lastTransform.invertY(d3.event.offsetY);
+const x = lastTransform.invertX(event.offsetX);
+const y = lastTransform.invertY(event.offsetY);
 ```
 
 Your click handler should look like this now:
 
 ```javascript
-d3.select('svg').on('click', function(){
-    var x = lastTransform.invertX(d3.event.offsetX); //adjust this
-    var y = lastTransform.invertY(d3.event.offsetY); //adjust this
+d3.select('svg').on('click', (event) => {
+    const x = lastTransform.invertX(event.offsetX); //adjust this
+    const y = lastTransform.invertY(event.offsetY); //adjust this
 
-    var date = xScale.invert(x)
-    var distance = yScale.invert(y);
+    const date = xScale.invert(x)
+    const distance = yScale.invert(y);
 
-    var newRun = {
+    const newRun = {
         id: ( runs.length > 0 ) ? runs[runs.length-1].id+1 : 1,
         date: formatTime(date),
         distance: distance
@@ -1157,23 +1157,23 @@ But now clicking before any zoom is broken, since `lastTransform` will be null:
 Find the code that we just wrote for the SVG click handler:
 
 ```javascript
-var x = lastTransform.invertX(d3.event.offsetX);
-var y = lastTransform.invertY(d3.event.offsetY);
+const x = lastTransform.invertX(event.offsetX);
+const y = lastTransform.invertY(event.offsetY);
 ```
 
 And adjust it so it looks like this:
 
 ```javascript
-var x = d3.event.offsetX;
-var y = d3.event.offsetY;
+let x = event.offsetX;
+let y = event.offsetY;
 
 if(lastTransform !== null){
-    x = lastTransform.invertX(d3.event.offsetX);
-    y = lastTransform.invertY(d3.event.offsetY);
+	x = lastTransform.invertX(event.offsetX);
+	y = lastTransform.invertY(event.offsetY);
 }
 ```
 
-Now initially, `x` and `y` are set to `d3.event.offsetX` and `d3.event.offsetY`, respectively.  If a zoom/pan occurs, `lastTransform` will not be null, so we overwrite `x` and `y` with the transformed values.
+Now initially, `x` and `y` are set to `event.offsetX` and `event.offsetY`, respectively.  If a zoom/pan occurs, `lastTransform` will not be null, so we overwrite `x` and `y` with the transformed values.
 
 Add a new run initially:
 
