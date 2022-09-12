@@ -1007,16 +1007,16 @@ You will also be able to pan left/right/up/down on the graph by clicking and dra
 Put the following code at the bottom of `app.js`:
 
 ```javascript
-var zoomCallback = function(){
-	d3.select('#points').attr("transform", d3.event.transform);
+const zoomCallback = (event) => {
+	d3.select('#points').attr("transform", event.transform);
 }
 ```
 
 This is the callback function that will be called when user attempts to zoom/pan.  All it does is take the zoom/pan action and turn it into a `transform` attribute that gets applied to the `<g id="points"></g>` element that contains the circles.  Now add the following code at the bottom of `app.js` to create the `zoom` behavior and attach it to the `svg` element:
 
 ```javascript
-var zoom = d3.zoom()
-    .on('zoom', zoomCallback);
+const zoom = d3.zoom()
+	.on('zoom', zoomCallback);
 d3.select('svg').call(zoom);
 ```
 
@@ -1029,13 +1029,13 @@ Now if we zoom out, the graph should look something like this:
 Now when we zoom, the points move in/out.  When we pan, they move vertically/horizontally.  Unfortunately, the axes don't update accordingly.  Let's first add ids to the `<g>` elements that contain them.  Find the following code:
 
 ```javascript
-var bottomAxis = d3.axisBottom(xScale);
+const bottomAxis = d3.axisBottom(xScale);
 d3.select('svg')
 	.append('g')
 	.call(bottomAxis)
-    .attr('transform', 'translate(0,'+HEIGHT+')');
+	.attr('transform', 'translate(0,'+HEIGHT+')');
 
-var leftAxis = d3.axisLeft(yScale);
+const leftAxis = d3.axisLeft(yScale);
 d3.select('svg')
 	.append('g')
 	.call(leftAxis);
@@ -1046,22 +1046,22 @@ Add `.attr('id', 'x-axis')` after the first `.append('g')` and `.attr('id', 'y-a
 ```javascript
 d3.select('svg')
 	.append('g')
-    .attr('id', 'x-axis') //add an id
+	.attr('id', 'x-axis') //add an id
 	.call(bottomAxis)
-    .attr('transform', 'translate(0,'+HEIGHT+')');
+	.attr('transform', 'translate(0,'+HEIGHT+')');
 
-var leftAxis = d3.axisLeft(yScale);
+const leftAxis = d3.axisLeft(yScale);
 d3.select('svg')
 	.append('g')
-    .attr('id', 'y-axis') //add an id
+	.attr('id', 'y-axis') //add an id
 	.call(leftAxis);
 ```
 
 Now let's use those ids to adjust the axes when we zoom.  Find this code:
 
 ```javascript
-var zoomCallback = function(){
-	d3.select('#points').attr("transform", d3.event.transform);
+const zoomCallback = function(event){
+	d3.select('#points').attr("transform", event.transform);
 }
 ```
 
@@ -1069,20 +1069,20 @@ Add the following at the end of the function declaration:
 
 ```javascript
 d3.select('#x-axis')
-    .call(bottomAxis.scale(d3.event.transform.rescaleX(xScale)));
+    .call(bottomAxis.scale(event.transform.rescaleX(xScale)));
 d3.select('#y-axis')
-    .call(leftAxis.scale(d3.event.transform.rescaleY(yScale)));
+    .call(leftAxis.scale(event.transform.rescaleY(yScale)));
 ```
 
 Your zoomCallback should now look like this:
 
 ```javascript
-var zoomCallback = function(){
-	d3.select('#points').attr("transform", d3.event.transform);
-    d3.select('#x-axis')
-        .call(bottomAxis.scale(d3.event.transform.rescaleX(xScale)));
-    d3.select('#y-axis')
-        .call(leftAxis.scale(d3.event.transform.rescaleY(yScale)));
+const zoomCallback = function(event){
+	d3.select('#points').attr("transform", event.transform);
+	d3.select('#x-axis')
+		.call(bottomAxis.scale(d3.event.transform.rescaleX(xScale)));
+	d3.select('#y-axis')
+		.call(leftAxis.scale(d3.event.transform.rescaleY(yScale)));
 }
 ```
 
