@@ -343,7 +343,7 @@ const dragBehavior = d3.drag() //set up the behavior
 d3.select('svg').call(dragBehavior); //atach dragBehavior to the svg
 ```
 
-Next, let's use `worldProjection.invert()` to take visual x/y coordinates and convert them into lat/lng coordinates.  Has parameters, it takes an array containing x and y pixel coordinates `[x,y]`, and it returns and array containing lat and lang coordinates `[lat,lng]`.  We'll use `worldProjection.invert([event.x, event.y])[0]` to get the latitude and `worldProjection.invert([event.x, event.y])[1]` to get the longitude.  At the bottom of the start handler, add the following:
+Next, let's use `worldProjection.invert()` to take visual x/y coordinates and convert them into lat/lng coordinates.  Has parameters, it takes an array containing x and y pixel coordinates `[x,y]`, and it returns and array containing lat and lang coordinates `[lat,lng]`.  We'll use `worldProjection.invert([event.x, event.y])[0]` to get the latitude and `worldProjection.invert([event.x, event.y])[1]` to get the longitude.  We'll then insert those values into the cells in `tr:nth-child(2)` (`nth-child(1)` is the header `tr`).  At the bottom of the start handler, add the following:
 
 ```js
 d3.select('table tr:nth-child(2) td:first-child') //select the top left cell of the table. The table header is tr:nth-child(1)
@@ -363,6 +363,26 @@ d3.selectAll('rect').remove(); //remove any previously drawn rectangles
 d3.select('svg').append('rect') //draw a rectangle of 0 height/width at the point where the drag started
 	.attr('x', event.x)
 	.attr('y', event.y);
+```
+
+When the user drags on the SVG, we want to update the rectangle's height/width and add lat/lng coordinates for the bottom right of the square in the table.  First, let's take care of the table.  Add the following to the `drag` handler (this is almost identical to the `start` handler, except we use `tr:nth-child(3)`):
+
+```js
+d3.select('table tr:nth-child(3) td:first-child') //select the bottom left cell of the table
+	//insert the first element of the map coords array (lat) into the html of the table cell
+	.html(worldProjection.invert([event.x, event.y])[0])
+d3.select('table tr:nth-child(3) td:last-child') //select the bottom right cell of the table
+	//insert the second element of the map coords array (lng) into the html of the table cell
+	.html(worldProjection.invert([event.x, event.y])[1])
+```
+
+To update the rectangle's width/height, we need to calculate it based on the current event's x/y position and the rectangle's starting x/y position.  Please add the following at the bottom of the `drag` handler:
+
+```js
+//computer width of the box based on current x value and current rect's x value
+d3.select('rect').attr('width', event.x-d3.select('rect').attr('x'))
+//computer height of the box based on current y value and current rect's y value
+d3.select('rect').attr('height', event.y-d3.select('rect').attr('y'))
 ```
 
 The finished drag behavior:
