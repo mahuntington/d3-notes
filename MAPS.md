@@ -424,6 +424,10 @@ d3.select('svg').call(dragBehavior); //atach dragBehavior to the svg
 
 ## Draw a polygon on the map and display its map coordinates
 
+This is similar to the square, except the user will click on multiple points on the map to draw a polygon.  The app will then output the lat/lng map coordinates into a table.
+
+First, reset our HTMl to the following:
+
 ```html
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -448,6 +452,94 @@ d3.select('svg').call(dragBehavior); //atach dragBehavior to the svg
 </body>
 </html>
 ```
+
+Now add the map in `app.js`:
+
+```js
+const width = 960;
+const height = 490;
+
+d3.select('svg')
+	.attr('width', width)
+	.attr('height', height);
+
+const worldProjection = d3.geoEquirectangular();
+const dAttributeFunction = d3.geoPath()
+	.projection(worldProjection);
+
+d3.select('svg').selectAll('path')
+	.data(map_json.features)
+	.enter()
+	.append('path')
+	.attr('fill', '#099')
+	.attr('d', dAttributeFunction);
+```
+
+Now let's create a click handler on the svg.  It's going to store the x/y visual click points in an array:
+
+```js
+let points = [];
+d3.select('svg').on('click', (event)=>{
+	points.push([event.x, event.y])
+	console.log(points);
+})
+```
+
+Loop through the array of points and build a path generating function:
+
+```js
+let points = [];
+d3.select('svg').on('click', (event)=>{
+	points.push([event.x, event.y])
+	const path = d3.path();
+	path.moveTo(points[0][0], points[0][1]) // move to the first point in the array
+	for(let i = 1; i < points.length; i++){ // loop through the rest of the array
+		path.lineTo(points[i][0], points[i][1]) // draw a line to each remaining point in the array
+	}
+	path.closePath() // when you're done, close the path
+})
+```
+
+Now create a polygon in the SVG and use the `path` to draw it.  Add the following at the end of the click handler:
+
+```js
+d3.select('#polygon').remove() //with each click, remove the previously drawn polygon
+d3.select('svg')
+	.append('path') // add a new polygon
+	.attr('id', 'polygon') //give it an id so it can be removed with the next click
+	.attr('fill', 'black') //fill
+	.attr('d', path) //attach the drawing function
+```
+
+Now we want to create a keydown handler so the user can hit Enter to generate the lat/lng coords and finish drawing the current polygon:
+
+```js
+d3.select('body').on('keydown', (event)=>{
+	const coords = points.map(point => worldProjection.invert(point)); //generate an array of lat/lng coords
+	console.log(coords);
+	points = []; // clear out the points array so the next click on the svg will begin a new polygon
+})
+```
+
+Now populate the table, removing any previous data that was in it:
+
+```js
+d3.select('body').on('keydown', (event)=>{
+	const coords = points.map(point => worldProjection.invert(point))
+	d3.select('tbody').html(''); //delete any rows that were previously generated
+	for(coord of coords){ //loop through the array of lat/lng coords
+		const row = d3.select('tbody') //create a new row
+			.append('tr')
+		row.append('td') //insert a cell with the latitude
+			.html(coord[0])
+		row.append('td') //insert a cell with the longitude
+			.html(coord[1])
+	}
+	points = [];
+})
+```
+
+The finished app.js:
 
 ```js
 const width = 960;
@@ -485,8 +577,8 @@ d3.select('svg').on('click', (event)=>{
 		.attr('d', path)
 })
 d3.select('body').on('keydown', (event)=>{
-	d3.select('tbody').html('');
 	const coords = points.map(point => worldProjection.invert(point))
+	d3.select('tbody').html('');
 	for(coord of coords){
 		const row = d3.select('tbody')
 			.append('tr')
