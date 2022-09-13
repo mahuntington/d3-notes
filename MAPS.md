@@ -8,6 +8,7 @@ The topics that we will cover in this chapter include:
 1. Generate a `<path>` using a projection and the GeoJSON data
 1. Create a rectangular overlay based on coordinates entered into a form
 1. Draw a rectangle on the map and display its map coordinates
+1. Draw a polygon on the map and display its map coordinates
 
 In this section we'll generate `<path>` elements from GeoJSON data that will draw a map of the world
 
@@ -419,6 +420,83 @@ const dragBehavior = d3.drag() //set up the behavior
 	})
 
 d3.select('svg').call(dragBehavior); //atach dragBehavior to the svg
+```
+
+## Draw a polygon on the map and display its map coordinates
+
+```html
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script src="https://d3js.org/d3.v7.min.js" charset="utf-8"></script>
+		<script src="https://cdn.rawgit.com/mahuntington/mapping-demo/master/map_data.js" charset="utf-8"></script>
+	</head>
+<body>
+	<svg></svg>
+	<table>
+		<thead>
+			<tr>
+				<th>lat</th>
+				<th>lng</th>
+			</tr>
+		</thead>
+		<tbody></tbody>
+	</table>
+	<script src="app.js" charset="utf-8"></script>
+</body>
+</html>
+```
+
+```js
+const width = 960;
+const height = 490;
+
+d3.select('svg')
+	.attr('width', width)
+	.attr('height', height);
+
+const worldProjection = d3.geoEquirectangular();
+const dAttributeFunction = d3.geoPath()
+	.projection(worldProjection);
+
+d3.select('svg').selectAll('path')
+	.data(map_json.features)
+	.enter()
+	.append('path')
+	.attr('fill', '#099')
+	.attr('d', dAttributeFunction);
+
+let points = [];
+d3.select('svg').on('click', (event)=>{
+	points.push([event.x, event.y])
+	const path = d3.path();
+	path.moveTo(points[0][0], points[0][1])
+	for(let i = 1; i < points.length; i++){
+		path.lineTo(points[i][0], points[i][1])
+	}
+	path.closePath()
+	d3.select('#polygon').remove()
+	d3.select('svg')
+		.append('path')
+		.attr('id', 'polygon')
+		.attr('fill', 'black')
+		.attr('d', path)
+})
+d3.select('body').on('keydown', (event)=>{
+	d3.select('tbody').html('');
+	const coords = points.map(point => worldProjection.invert(point))
+	for(coord of coords){
+		const row = d3.select('tbody')
+			.append('tr')
+		row.append('td')
+			.html(coord[0])
+		row.append('td')
+			.html(coord[1])
+	}
+	points = [];
+})
 ```
 
 ## Conclusion
